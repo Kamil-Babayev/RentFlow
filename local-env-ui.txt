@@ -1,0 +1,3 @@
+Keycloak → http://localhost:8180 — login with admin / admin
+MinIO Console → http://localhost:9001 — login with minioadmin / minioadmin123
+Mongo Express → http://localhost:8081 — no login needed (basic auth is disabled)
