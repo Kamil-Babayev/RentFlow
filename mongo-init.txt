@@ -1,0 +1,19 @@
+**What each part does:**
+
+**Environment:**
+- MONGO_INITDB_ROOT_USERNAME/PASSWORD — creates the root admin user
+- MONGO_INITDB_DATABASE — the database that mongo-init.js runs against on first startup
+
+**Volumes:**
+- mongodb_data:/data/db — persists your data across restarts
+- ./mongo-init.js:/docker-entrypoint-initdb.d/ — any .js or .sh file placed here runs automatically on first startup only (when the volume is empty). Good for seeding data or creating users.
+
+**Mongo Express** is the optional web UI available at http://localhost:8081. It's the equivalent of pgAdmin for Postgres — lets you browse collections, run queries, inspect documents visually. ME_CONFIG_BASICAUTH: false disables the extra login prompt for local dev.
+
+    **In your app** connect with:
+
+mongodb://myuser:mypassword@localhost:27017/mydb
+
+Or from another container in the same compose network:
+
+mongodb://myuser:mypassword@mongodb:27017/mydb

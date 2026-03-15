@@ -8,26 +8,26 @@
 
 ## Technology Stack Reference
 
-| Concern | Technology |
-|---|---|
-| API Gateway | Go |
-| User & Booking Services | Java 21 + Spring Boot 3 |
-| Listing, Payment, Notification Services | Go + Gin |
-| REST | Gin (Go), Spring MVC (Java) |
-| Interservice communication | gRPC |
-| Message broker | Apache Kafka |
-| Primary database | PostgreSQL (per service, own schema) |
-| Cache / ephemeral store | Redis |
-| Document store | MongoDB (NotificationService) |
-| Object storage | Minio (listing photos) |
-| Auth provider | Keycloak (OAuth2 / OpenID Connect) |
-| DB migrations | golang-migrate (Go), Flyway (Java) |
-| Observability | Prometheus + Grafana + Loki + Jaeger (OpenTelemetry) |
-| Resilience | Resilience4j (Java), manual retry/timeout (Go) |
-| Containerisation | Docker + Docker Compose |
-| Orchestration | Kubernetes (local via kind) |
-| CI/CD | GitHub Actions |
-| Testing | Testcontainers, Testify/Gomock, JUnit5/Mockito, Pact |
+| Concern                                 | Technology                                           |
+|-----------------------------------------|------------------------------------------------------|
+| API Gateway                             | Go                                                   |
+| User & Booking Services                 | Java 21 + Spring Boot 3                              |
+| Listing, Payment, Notification Services | Go + Gin                                             |
+| REST                                    | Gin (Go), Spring MVC (Java)                          |
+| Interservice communication              | gRPC                                                 |
+| Message broker                          | Apache Kafka                                         |
+| Primary database                        | PostgreSQL (per service, own schema)                 |
+| Cache / ephemeral store                 | Redis                                                |
+| Document store                          | MongoDB (NotificationService)                        |
+| Object storage                          | Minio (listing photos)                               |
+| Auth provider                           | Keycloak (OAuth2 / OpenID Connect)                   |
+| DB migrations                           | golang-migrate (Go), Flyway (Java)                   |
+| Observability                           | Prometheus + Grafana + Loki + Jaeger (OpenTelemetry) |
+| Resilience                              | Resilience4j (Java), manual retry/timeout (Go)       |
+| Containerisation                        | Docker + Docker Compose                              |
+| Orchestration                           | Kubernetes (local via kind)                          |
+| CI/CD                                   | GitHub Actions                                       |
+| Testing                                 | Testcontainers, Testify/Gomock, JUnit5/Mockito, Pact |
 
 ---
 
@@ -188,7 +188,7 @@ make dev-booking       Run BookingService locally
 
 A new user submits their details. UserService creates a Keycloak account via the
 Keycloak Admin REST API, then creates a profile record in its own Postgres database.
-These two writes must be treated as a saga — if Postgres write fails after Keycloak
+These two write must be treated as a saga — if Postgres write fails after Keycloak
 account creation, the Keycloak account must be rolled back.
 
 **Request:** `POST /api/v1/users/register`
@@ -546,7 +546,7 @@ and owner display name (fetched from UserService via gRPC, cached in Redis)
 **Service:** ListingService (Go + Gin)
 
 Owners can manually block dates (maintenance, personal use). The system automatically
-blocks dates when a booking is confirmed and unblocks them when cancelled.
+blocks dates when a booking is confirmed and unblocks them when canceled.
 This is the only service that writes to the availability table.
 
 **Endpoints:**
@@ -711,7 +711,7 @@ discard it silently.
   receives the event and initiates refund flow
 
 **Acceptance criteria:**
-- `ACTIVE` or `COMPLETED` bookings cannot be cancelled — returns `409 Conflict`
+- `ACTIVE` or `COMPLETED` bookings cannot be canceled — returns `409 Conflict`
 - Within 24 hours of check-in returns `422 Unprocessable Entity` with reason
 - Cancellation publishes `booking.cancelled` event reliably (outbox pattern)
 
@@ -748,7 +748,7 @@ payment timeouts.
 
 **Request:** `PUT /api/v1/admin/bookings/{bookingId}/resolve`
 ```json
-{ "action": "CONFIRM" | "CANCEL" }
+{ "action": "CONFIRM / CANCEL" }
 ```
 
 **Acceptance criteria:**
@@ -859,7 +859,7 @@ Every payment attempt is persisted in Postgres regardless of outcome.
 
 **Service:** PaymentService (Go) — Kafka consumer
 
-PaymentService subscribes to `booking.cancelled` events. When a booking is cancelled
+PaymentService subscribes to `booking.canceled` events. When a booking is canceled
 it checks if a successful payment exists for that booking and, if so, initiates a refund.
 
 **Actions:**
@@ -911,18 +911,18 @@ concurrently. Each notification type is handled by a dedicated goroutine pool.
 ### US5.2 — Email Notifications
 
 All emails are sent via a pluggable email provider interface. In development,
-the provider is a Mailhog SMTP client. In production it would be replaced with
+the provider is a Mailhog SMTP client. In production, it would be replaced with
 Mailgun/SendGrid without changing consumer logic.
 
 **Notification types and recipients:**
 
-| Event | Recipients | Subject |
-|---|---|---|
-| `booking.confirmed` | Renter + Owner | "Your booking is confirmed" / "New booking received" |
-| `booking.cancelled` | Renter + Owner | "Booking cancelled" |
-| `payment.failed` | Renter | "Payment failed for your booking" |
-| `payment.refunded` | Renter | "Your refund is on the way" |
-| `listing.deactivated` | Renter (if active booking exists) | "Important: your upcoming booking" |
+| Event                 | Recipients                        | Subject                                              |
+|-----------------------|-----------------------------------|------------------------------------------------------|
+| `booking.confirmed`   | Renter + Owner                    | "Your booking is confirmed" / "New booking received" |
+| `booking.cancelled`   | Renter + Owner                    | "Booking cancelled"                                  |
+| `payment.failed`      | Renter                            | "Payment failed for your booking"                    |
+| `payment.refunded`    | Renter                            | "Your refund is on the way"                          |
+| `listing.deactivated` | Renter (if active booking exists) | "Important: your upcoming booking"                   |
 
 **Acceptance criteria:**
 - All email templates render correctly with dynamic fields
@@ -990,7 +990,7 @@ Apply circuit breakers and retry policies to all outbound gRPC calls.
 
 ### US6.2 — Health Checks
 
-Every service exposes standardised health endpoints:
+Every service exposes standardized health endpoints:
 - `GET /health/live` — liveness: returns `200` if the process is running
 - `GET /health/ready` — readiness: returns `200` only if DB, Kafka, and Redis connections are healthy
 
@@ -1008,13 +1008,13 @@ Each service exposes `GET /metrics` in Prometheus format.
 
 **Custom metrics to instrument:**
 
-| Service | Metric |
-|---|---|
-| BookingService | `bookings_initiated_total`, `bookings_confirmed_total`, `bookings_cancelled_total` |
-| PaymentService | `payments_initiated_total`, `payments_succeeded_total`, `payments_failed_total` |
-| ListingService | `listing_search_cache_hits_total`, `listing_search_cache_misses_total` |
-| NotificationService | `notifications_dispatched_total`, `notifications_failed_total` |
-| API Gateway | `gateway_requests_total{service, status_code}`, `gateway_request_duration_seconds` |
+| Service             | Metric                                                                             |
+|---------------------|------------------------------------------------------------------------------------|
+| BookingService      | `bookings_initiated_total`, `bookings_confirmed_total`, `bookings_cancelled_total` |
+| PaymentService      | `payments_initiated_total`, `payments_succeeded_total`, `payments_failed_total`    |
+| ListingService      | `listing_search_cache_hits_total`, `listing_search_cache_misses_total`             |
+| NotificationService | `notifications_dispatched_total`, `notifications_failed_total`                     |
+| API Gateway         | `gateway_requests_total{service, status_code}`, `gateway_request_duration_seconds` |
 
 **Acceptance criteria:**
 - All metrics are visible in Prometheus UI
@@ -1031,7 +1031,7 @@ Three dashboards:
 **Booking Funnel:** bookings initiated → awaiting payment → confirmed → active → completed,
 drop-off rate at each stage, payment failure rate
 
-**Infrastructure:** Kafka consumer lag per topic, Postgres connection pool utilisation,
+**Infrastructure:** Kafka consumer lag per topic, Postgres connection pool utilization,
 Redis hit/miss ratio
 
 **Acceptance criteria:**
@@ -1152,29 +1152,29 @@ The following are explicitly out of scope for this project:
 
 ## Appendix — Kafka Topic Reference
 
-| Topic | Producer | Consumers | Payload key |
-|---|---|---|---|
-| `user.deactivated` | UserService | ListingService, NotificationService | `userId` |
-| `user.hard-deleted` | UserService | All services | `userId` |
-| `listing.published` | ListingService | NotificationService | `listingId` |
+| Topic                 | Producer       | Consumers                           | Payload key |
+|-----------------------|----------------|-------------------------------------|-------------|
+| `user.deactivated`    | UserService    | ListingService, NotificationService | `userId`    |
+| `user.hard-deleted`   | UserService    | All services                        | `userId`    |
+| `listing.published`   | ListingService | NotificationService                 | `listingId` |
 | `listing.deactivated` | ListingService | BookingService, NotificationService | `listingId` |
-| `booking.confirmed` | BookingService | NotificationService | `bookingId` |
-| `booking.cancelled` | BookingService | PaymentService, NotificationService | `bookingId` |
-| `payment.completed` | PaymentService | BookingService | `bookingId` |
-| `payment.failed` | PaymentService | BookingService, NotificationService | `bookingId` |
-| `payment.timeout` | PaymentService | BookingService, NotificationService | `bookingId` |
-| `payment.refunded` | PaymentService | NotificationService | `bookingId` |
+| `booking.confirmed`   | BookingService | NotificationService                 | `bookingId` |
+| `booking.cancelled`   | BookingService | PaymentService, NotificationService | `bookingId` |
+| `payment.completed`   | PaymentService | BookingService                      | `bookingId` |
+| `payment.failed`      | PaymentService | BookingService, NotificationService | `bookingId` |
+| `payment.timeout`     | PaymentService | BookingService, NotificationService | `bookingId` |
+| `payment.refunded`    | PaymentService | NotificationService                 | `bookingId` |
 
 ---
 
 ## Appendix — gRPC Method Reference
 
-| Proto file | Method | Caller | Provider |
-|---|---|---|---|
-| `listing_service.proto` | `GetListing` | BookingService | ListingService |
-| `listing_service.proto` | `LockAvailability` | BookingService | ListingService |
-| `listing_service.proto` | `ConfirmAvailabilityLock` | BookingService | ListingService |
-| `listing_service.proto` | `ReleaseAvailabilityLock` | BookingService | ListingService |
-| `user_service.proto` | `GetUserProfile` | ListingService, NotificationService | UserService |
-| `payment_service.proto` | `InitiatePayment` | BookingService | PaymentService |
-| `payment_service.proto` | `GetPaymentStatus` | BookingService | PaymentService |
+| Proto file              | Method                    | Caller                              | Provider       |
+|-------------------------|---------------------------|-------------------------------------|----------------|
+| `listing_service.proto` | `GetListing`              | BookingService                      | ListingService |
+| `listing_service.proto` | `LockAvailability`        | BookingService                      | ListingService |
+| `listing_service.proto` | `ConfirmAvailabilityLock` | BookingService                      | ListingService |
+| `listing_service.proto` | `ReleaseAvailabilityLock` | BookingService                      | ListingService |
+| `user_service.proto`    | `GetUserProfile`          | ListingService, NotificationService | UserService    |
+| `payment_service.proto` | `InitiatePayment`         | BookingService                      | PaymentService |
+| `payment_service.proto` | `GetPaymentStatus`        | BookingService                      | PaymentService |
