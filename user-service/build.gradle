@@ -38,6 +38,7 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
 	implementation 'org.springframework.grpc:spring-grpc-client-spring-boot-starter'
 	implementation 'org.springframework.grpc:spring-grpc-server-web-spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-resource-server'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -51,6 +52,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.mapstruct:mapstruct:1.6.3'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+	implementation("org.keycloak:keycloak-admin-client:26.0.7")
 }
 
 dependencyManagement {

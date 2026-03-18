@@ -48,6 +48,7 @@ public class UserControllerImpl implements UserController {
         return ResponseEntity.noContent().build();
     }
 
+    //TODO: add @PreAuthorize to restrict access to this endpoint to admins only
     @DeleteMapping("{userId}/hard")
     public ResponseEntity<Void> hardDeleteUser(@PathVariable UUID userId) {
         userService.hardDeleteUser(userId);
