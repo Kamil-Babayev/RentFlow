@@ -40,6 +40,9 @@ public class User {
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
+    @Column(unique = true, nullable = false)
+    private String keycloakId;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private PersonalInformation personalInformation;
 

@@ -4,4 +4,4 @@ public enum UserStatus {
     ACTIVE,
     INACTIVE,
     REGISTERED
-  }
+}

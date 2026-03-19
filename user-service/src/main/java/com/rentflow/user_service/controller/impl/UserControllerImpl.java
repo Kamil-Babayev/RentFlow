@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+//TODO: add endpoint for updating user personal info
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")

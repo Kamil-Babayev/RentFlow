@@ -18,4 +18,5 @@ public interface UserService {
     void deleteCurrentUser();
 
     void hardDeleteUser(UUID userId);
+
 }

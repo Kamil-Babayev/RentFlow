@@ -1,5 +1,6 @@
-package com.rentflow.user_service.service.keycloak;
+package com.rentflow.user_service.service.keycloak.impl;
 
+import com.rentflow.user_service.service.keycloak.contract.IdentityAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -11,7 +12,7 @@ import org.springframework.web.client.RestClient;
 
 @Service
 @RequiredArgsConstructor
-public class KeycloakAuthService {
+public class KeycloakAuthServiceImpl implements IdentityAuthService {
 
     @Value("${keycloak.server-url}")
     private String serverUrl;
